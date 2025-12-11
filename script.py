@@ -408,9 +408,7 @@ Celà montre comment les arrivées influencent l’évolution globale des recett
         xaxis_title="Mois",
         yaxis_title="Année"
     )
-
-    st.plotly_chart(fig, use_container_width=True)
-# Affichage
+    # Affichage
     st.plotly_chart(fig, use_container_width=True)
     if "recettes actuel" in filtered_data_trimestre.columns and "dépenses actuel" in filtered_data_trimestre.columns:
         somme_annuelle_rec = filtered_data_trimestre.groupby("Année")["recettes actuel"].sum().reset_index()

@@ -210,16 +210,16 @@ def get_data():
     """
 
     with col1:
-        st.markdown(card_style.format(label="Nb Arrivées", value=f"{total_arrivees:,.0f}"), unsafe_allow_html=True)
+        st.markdown(card_style.format(label="✈️ Nb Arrivées", value=f"{total_arrivees:,.0f}"), unsafe_allow_html=True)
 
     with col2:
-        st.markdown(card_style.format(label="Recettes", value=f"{total_recettes:,.0f}"), unsafe_allow_html=True)
+        st.markdown(card_style.format(label="💰 Recettes", value=f"{total_recettes:,.0f}"), unsafe_allow_html=True)
 
     with col3:
-        st.markdown(card_style.format(label="Dépenses", value=f"{total_depenses:,.0f}"), unsafe_allow_html=True)
+        st.markdown(card_style.format(label="📉 Dépenses", value=f"{total_depenses:,.0f}"), unsafe_allow_html=True)
         
     with col4:
-        st.markdown(card_style.format(label="Soldes", value=f"{total_soldes:,.0f}"), unsafe_allow_html=True)
+        st.markdown(card_style.format(label="⚖️ Soldes", value=f"{total_soldes:,.0f}"), unsafe_allow_html=True)
         
     col1, col2 = st.columns(2)
     with col1:
@@ -227,49 +227,189 @@ def get_data():
     # Renommer pour éviter conflits
         somme_annuelle_recettes = filtered_data.groupby("Année")["recettes actuel"].sum().reset_index()
         df_wb_renamed = somme_annuelle_recettes.rename(columns={"recettes actuel": "Recettes"}).copy()
-# Fusionner par année
-        df_merge = pd.merge(somme_annuelle_arrivvees, df_wb_renamed[["Année", "Recettes"]], left_on="Année", right_on="Année", how="inner")
+        # ============================
+        # --- ANALYSE STATISTIQUE ---
+        # ============================
+
+        # --- Corrélation Pearson ---
+        correlation = df_merge["Arrivees"].corr(df_merge["Recettes"])
+
+        # --- Régression linéaire ---
+
+        X = df_merge[["Arrivees"]]      # variable explicative
+        y = df_merge["Recettes"]        # variable cible
+
+        model = LinearRegression()
+        model.fit(X, y)
+
+        # prédiction pour tracer la ligne
+        df_merge["Prediction"] = model.predict(X)
+
+        # ============================
+        # --- NUAGE DE POINTS PLOTLY ---
+        # ============================
+
         fig = px.scatter(
-        data_frame=df_merge,          # dataframe fusionné
-        x="Arrivees",                 # somme annuelle des arrivées Excel
-        y="Recettes",                 # recettes WBData
-        color="Année",                # couleur selon l'année
-        size="Recettes",              # taille des points selon les recettes
-        hover_name="Année",           # info affichée au survol
-        title="Relation entre les recettes et le nombre d'arrivées par année",
-        labels={
-        "Arrivees": "Nombre d'arrivées",
-        "Recettes": "Recettes"
-        }
+            data_frame=df_merge,
+            x="Arrivees",
+            y="Recettes",
+            color="Année",
+            size="Recettes",
+            hover_name="Année",
+            title="Relation entre les recettes et le nombre d'arrivées par année",
+            labels={
+                "Arrivees": "Nombre d'arrivées",
+                "Recettes": "Recettes"
+            }
         )
+
+        # --- Ajouter la ligne de régression ---
+        fig.add_traces(
+            px.line(
+                df_merge, 
+                x="Arrivees", 
+                y="Prediction"
+            ).data
+        )
+
         st.plotly_chart(fig, use_container_width=True)
     with col2:
+        st.write("")
+
+        # =================================
+        # --- AFFICHAGE DES RÉSULTATS ---
+        # =================================
+        st.subheader("Analyse statistique")
+        st.markdown(f"""
+        **Coefficient de corrélation (Pearson)** : **{correlation:.3f}**
+        **Modèle de régression linéaire :**
+        - Formule : `Recettes = {model.coef_[0]:.2f} × Arrivées + {model.intercept_:.2f}`
+        **Analyse automatique :**  
+Chaque arrivée supplémentaire entraîne une variation de **{model.coef_[0]:.2f}** dans les recettes.  
+La valeur de base des recettes, lorsque le nombre d’arrivées est nul,est de **{model.intercept_:.2f}**.  
+Celà montre comment les arrivées influencent l’évolution globale des recettes.
+        """)
+        
+        # Detection d'anomalie
+        if "Arrivees" in df_merge.columns and "Recettes" in df_merge.columns:
+
+            df = df_merge.copy()
+
+            # Régression linéaire simple
+            x = df["Arrivees"]
+            y = df["Recettes"]
+
+            m, b = np.polyfit(x, y, 1)
+
+            # Valeur prédite
+            df["recettes_predites"] = m * df["Arrivees"] + b
+
+            # Ecart entre réel et prédit
+            df["ecart"] = df["Recettes"] - df["recettes_predites"]
+
+            # Détection des anomalies (seuil = 1 écart-type)
+            seuil = df["ecart"].std()
+
+            df["type_anomalie"] = "Normal"
+
+            df.loc[df["ecart"] < -seuil, "type_anomalie"] = "🟥 Beaucoup d'arrivées mais peu de recettes"
+            df.loc[df["ecart"] > seuil, "type_anomalie"] = "🟩 Peu d'arrivées mais beaucoup de recettes"
+
+            # Affichage dans le dashboard
+            st.subheader("🔍 Détection des anomalies Arrivées ↔ Recettes")
+
+            anomalies = df[df["type_anomalie"] != "Normal"]
+
+            if anomalies.empty:
+                st.success("Aucune anomalie détectée dans la période sélectionnée.")
+            else:
+                st.warning("Anomalies détectées :")
+                st.dataframe(anomalies[["Année","Arrivees", "Recettes", "ecart", "type_anomalie"]])
+
+        else:
+            st.error("Colonnes 'Arrivees' et 'Recettes' manquantes.")
 # Somme annuelle des arrivées
-        df_yearly = filtered_data.groupby("Année", as_index=False)["Arrivees"].sum()
+    df_yearly = filtered_data.groupby("Année", as_index=False)["Arrivees"].sum()
 
 # Création du graphique stylé
-        fig = px.line(
-    df_yearly,
-    x="Année",
-    y="Arrivees",
-    title="Évolution des arrivées touristiques",
-    line_shape='spline',          # ligne lisse
-    color_discrete_sequence=['#1f77b4']  # couleur personnalisée
-        )
+    fig = px.line(
+        df_yearly,
+        x="Année",
+        y="Arrivees",
+        title="Évolution des arrivées touristiques",
+        line_shape='spline',          # ligne lisse
+        color_discrete_sequence=['#1f77b4']  # couleur personnalisée
+            )
 
 # Mise en forme du layout
-        fig.update_layout(
-    xaxis_title="Année",
-    yaxis_title="Nombre d'arrivées",
-    title_font_size=20,
-    xaxis=dict(tickmode='linear'),
-    yaxis=dict(tickformat=','),
-    template="plotly_white",
-    font=dict(family="Arial", size=12)
+    fig.update_layout(
+        xaxis_title="Année",
+        yaxis_title="Nombre d'arrivées",
+        title_font_size=20,
+        xaxis=dict(tickmode='linear'),
+        yaxis=dict(tickformat=','),
+        template="plotly_white",
+        font=dict(family="Arial", size=12)
+            )
+    
+    somme_annuelle_arrivees = filtered_data_trimestre.groupby("Année")["Arrivees"].sum().reset_index()
+# Fusionner par année
+    df_merge = pd.merge(somme_trimestrielle, somme_annuelle_arrivees[["Année", "Arrivees"]], left_on="Année", right_on="Année", how="inner")
+    fig = px.bar(
+        df_merge,
+        x="Année",
+        y="Arrivees_x",
+        color="Trimestre",    
+        barmode="group",      
+        title="Arrivées touristiques par année et par trimestre",
         )
 
+    fig.update_layout(
+        xaxis_title="Année",
+        yaxis_title="Arrivées",
+        legend_title="Trimestre",
+        template="plotly_white",
+        legend=dict(
+            orientation="v",
+            yanchor="top",
+            y=1,
+            xanchor="left",
+            x=1.02           
+        )
+        )
+
+    st.plotly_chart(fig, use_container_width=True)
+    # Heatmap pour les arrivées touristiques
+    
+    # Pivot pour la heatmap
+    heatmap_data = filtered_data.pivot_table(
+        index='Année', 
+        columns='Mois', 
+        values='Arrivees',
+        aggfunc='sum'
+    )
+
+    # Pour Plotly, on "dé-pivot" pour avoir long format
+    heatmap_long = heatmap_data.reset_index().melt(id_vars='Année', var_name='Mois', value_name='Arrivees')
+
+    # Création de la heatmap interactive
+    fig = px.imshow(
+        heatmap_data.values,
+        x=heatmap_data.columns,
+        y=heatmap_data.index,
+        color_continuous_scale='YlGnBu',
+        text_auto=True 
+    )
+
+    fig.update_layout(
+        title="Heatmap interactive des arrivées touristiques",
+        xaxis_title="Mois",
+        yaxis_title="Année"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 # Affichage
-        st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True)
     if "recettes actuel" in filtered_data_trimestre.columns and "dépenses actuel" in filtered_data_trimestre.columns:
         somme_annuelle_rec = filtered_data_trimestre.groupby("Année")["recettes actuel"].sum().reset_index()
         somme_annuelle_dep = filtered_data_trimestre.groupby("Année")["dépenses actuel"].sum().reset_index()
@@ -355,87 +495,76 @@ def get_data():
         
     col1, col2 = st.columns(2)
     with col1:
+        # --- Calcul des valeurs annuelles ---
         df_yearly = filtered_data.groupby("Année", as_index=False)["recettes % des exportations"].sum()
 
-# Création du graphique stylé
+        # --- Calcul de la variation en % par rapport à l'année précédente ---
+        df_yearly['pct_change'] = df_yearly['recettes % des exportations'].pct_change() * 100
+
+        # --- Définir la couleur selon la variation ---
+        df_yearly['color'] = df_yearly['pct_change'].apply(lambda x: 'green' if x > 0 else ('red' if x < 0 else 'blue'))
+
+        # --- Créer le graphique ---
         fig = px.line(
-    df_yearly,
-    x="Année",
-    y="recettes % des exportations",
-    title="Parts du tourisme dans les exportations",
-    # line_shape='spline',          # ligne lisse
-    color_discrete_sequence=['#1f77b4']  # couleur personnalisée
+            df_yearly,
+            x="Année",
+            y="recettes % des exportations",
+            title="Parts du tourisme dans les exportations",
+            markers=True,  # Affiche les points
+            color_discrete_sequence=['#1f77b4']  # couleur personnalisée
+
         )
 
-# Mise en forme du layout
-        fig.update_layout(
-    xaxis_title="Année",
-    yaxis_title="Valeurs",
-    title_font_size=20,
-    xaxis=dict(tickmode='linear'),
-    yaxis=dict(tickformat=','),
-    template="plotly_white",
-    font=dict(family="Arial", size=12)
-        )
+        # --- Ajouter les annotations (pourcentage sur chaque point) ---
+        for i, row in df_yearly.iterrows():
+            if pd.notna(row['pct_change']):  # Ignorer la première année (pas de variation)
+                fig.add_annotation(
+                    x=row['Année'],
+                    y=row['recettes % des exportations'],
+                    text=f"{row['pct_change']:.1f}%",
+                    showarrow=False,
+                    arrowhead=1,
+                    arrowcolor=row['color'],
+                    font=dict(color=row['color']),
+                    yshift=15
+                )
 
-# Affichage
         st.plotly_chart(fig, use_container_width=True)
+
     with col2:
                 # Somme annuelle des arrivées
         df_yearly = filtered_data.groupby("Année", as_index=False)["dépenses % des importations"].sum()
+        # --- Calcul de la variation en % par rapport à l'année précédente ---
+        df_yearly['pct_change'] = df_yearly['dépenses % des importations'].pct_change() * 100
 
-# Création du graphique stylé
+        # --- Définir la couleur selon la variation ---
+        df_yearly['color'] = df_yearly['pct_change'].apply(lambda x: 'green' if x > 0 else ('red' if x < 0 else 'blue'))
+
+        # Création du graphique stylé
         fig = px.line(
-    df_yearly,
-    x="Année",
-    y="dépenses % des importations",
-    title="Dépenses touristique par rapport aux importations",
+            df_yearly,
+            x="Année",
+            y="dépenses % des importations",
+            title="Dépenses touristique par rapport aux importations",
+            markers=True,
                    # affiche des points sur la ligne
-    # line_shape='spline',          # ligne lisse
-    color_discrete_sequence=['#1f77b4']  # couleur personnalisée
-        )
-
-# Mise en forme du layout
-        fig.update_layout(
-    xaxis_title="Année",
-    yaxis_title="Valeurs",
-    title_font_size=20,
-    xaxis=dict(tickmode='linear'),
-    yaxis=dict(tickformat=','),
-    template="plotly_white",
-    font=dict(family="Arial", size=12)
-        )
+            # line_shape='spline',          # ligne lisse
+            color_discrete_sequence=['#1f77b4']  # couleur personnalisée
+            )
+        # --- Ajouter les annotations (pourcentage sur chaque point) ---
+        for i, row in df_yearly.iterrows():
+            if pd.notna(row['pct_change']):  # Ignorer la première année (pas de variation)
+                fig.add_annotation(
+                    x=row['Année'],
+                    y=row['dépenses % des importations'],
+                    text=f"{row['pct_change']:.1f}%",
+                    showarrow=False,
+                    arrowhead=1,
+                    arrowcolor=row['color'],
+                    font=dict(color=row['color']),
+                    yshift=15
+                )
         st.plotly_chart(fig, use_container_width=True)
-        
-    st.subheader("Arrivées touristiques par trimestre et par année")
-    somme_annuelle_arrivees = filtered_data_trimestre.groupby("Année")["Arrivees"].sum().reset_index()
-# Fusionner par année
-    df_merge = pd.merge(somme_trimestrielle, somme_annuelle_arrivees[["Année", "Arrivees"]], left_on="Année", right_on="Année", how="inner")
-    fig = px.bar(
-    df_merge,
-    x="Année",
-    y="Arrivees_x",
-    color="Trimestre",    
-    barmode="group",      
-    title="Arrivées touristiques par année et par trimestre",
-    )
-
-    fig.update_layout(
-    xaxis_title="Année",
-    yaxis_title="Arrivées",
-    legend_title="Trimestre",
-    template="plotly_white",
-    legend=dict(
-        orientation="v",
-        yanchor="top",
-        y=1,
-        xanchor="left",
-        x=1.02           
-    )
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
-
 
         # Mise en forme des données pour le graphique
     somme_annuelle_dep_transport = filtered_data_trimestre.groupby("Année")["dépenses pour le transport"].sum().reset_index()

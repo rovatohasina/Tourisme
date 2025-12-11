@@ -225,10 +225,10 @@ def get_data():
     with col1:
             # --- Création du nuage de points ---
     # Renommer pour éviter conflits
-        df_merge = pd.merge(somme_annuelle_arrivvees, df_wb_renamed[["Année", "Recettes"]], left_on="Année", right_on="Année", how="inner")
-
         somme_annuelle_recettes = filtered_data.groupby("Année")["recettes actuel"].sum().reset_index()
         df_wb_renamed = somme_annuelle_recettes.rename(columns={"recettes actuel": "Recettes"}).copy()
+        df_merge = pd.merge(somme_annuelle_arrivvees, df_wb_renamed[["Année", "Recettes"]], left_on="Année", right_on="Année", how="inner")
+
         # ============================
         # --- ANALYSE STATISTIQUE ---
         # ============================

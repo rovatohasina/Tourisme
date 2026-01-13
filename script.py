@@ -336,7 +336,8 @@ def get_data():
         # ============================
         # --- NUAGE DE POINTS PLOTLY ---
         # ============================
-
+        st.write("")
+        st.subheader("Relation entre les recettes et le nombre d'arrivées")
         fig = px.scatter(
             data_frame=df_merge,
             x="Arrivees",
@@ -344,21 +345,21 @@ def get_data():
             color="Année",
             size="Recettes",
             hover_name="Année",
-            title="Relation entre les recettes et le nombre d'arrivées par année",
+            # title="Relation entre les recettes et le nombre d'arrivées par année",
             labels={
                 "Arrivees": "Nombre d'arrivées",
                 "Recettes": "Recettes"
             }
         )
 
-        # --- Ajouter la ligne de régression ---
-        fig.add_traces(
-            px.line(
-                df_merge, 
-                x="Arrivees", 
-                y="Prediction"
-            ).data
-        )
+        # # --- Ajouter la ligne de régression ---
+        # fig.add_traces(
+        #     px.line(
+        #         df_merge, 
+        #         x="Arrivees", 
+        #         y="Prediction"
+        #     ).data
+        # )
 
         st.plotly_chart(fig, use_container_width=True)
 
@@ -368,15 +369,9 @@ def get_data():
         # =================================
         # --- AFFICHAGE DES RÉSULTATS ---
         # =================================
-        st.subheader("Analyse statistique")
+        st.subheader("Analyse statistique et détection des anomalies")
         st.markdown(f"""
-        **Coefficient de corrélation (Pearson)** : **{correlation:.3f}**
-        **Modèle de régression linéaire :**
-        - Formule : `Recettes = {model.coef_[0]:.2f} × Arrivées + {model.intercept_:.2f}`
-        **Analyse automatique :**  
-Chaque arrivée supplémentaire entraîne une variation de **{model.coef_[0]:.2f}** dans les recettes.  
-La valeur de base des recettes, lorsque le nombre d’arrivées est nul,est de **{model.intercept_:.2f}**.  
-Celà montre comment les arrivées influencent l’évolution globale des recettes.
+        Coefficient de corrélation: **{correlation:.3f}**
         """)
         
         # Detection d'anomalie
@@ -394,107 +389,109 @@ Celà montre comment les arrivées influencent l’évolution globale des recett
             df["recettes_predites"] = m * df["Arrivees"] + b
 
             # Ecart entre réel et prédit
-            df["ecart"] = df["Recettes"] - df["recettes_predites"]
+            df["écart"] = df["Recettes"] - df["recettes_predites"]
 
             # Détection des anomalies (seuil = 1 écart-type)
-            seuil = df["ecart"].std()
+            seuil = df["écart"].std()
 
-            df["type_anomalie"] = "Normal"
+            df["type anomalie"] = "Normal"
 
-            df.loc[df["ecart"] < -seuil, "type_anomalie"] = "🟥 Beaucoup d'arrivées mais peu de recettes"
-            df.loc[df["ecart"] > seuil, "type_anomalie"] = "🟩 Peu d'arrivées mais beaucoup de recettes"
+            df.loc[df["écart"] < -seuil, "type anomalie"] = "🟥 Beaucoup d'arrivées mais peu de recettes"
+            df.loc[df["écart"] > seuil, "type anomalie"] = "🟩 Peu d'arrivées mais beaucoup de recettes"
 
             # Affichage dans le dashboard
-            st.subheader("🔍 Détection des anomalies Arrivées ↔ Recettes")
-
-            anomalies = df[df["type_anomalie"] != "Normal"]
+            anomalies = df[df["type anomalie"] != "Normal"]
 
             if anomalies.empty:
                 st.success("Aucune anomalie détectée dans la période sélectionnée.")
             else:
                 st.warning("Anomalies détectées :")
-                st.dataframe(anomalies[["Année","Arrivees", "Recettes", "ecart", "type_anomalie"]])
+                st.dataframe(anomalies[["Année","Arrivees", "Recettes", "écart", "type anomalie"]])
 
         else:
             st.error("Colonnes 'Arrivees' et 'Recettes' manquantes.")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        somme_annuelle_arrivees = filtered_data_trimestre.groupby("Année")["Arrivees"].sum().reset_index()
+    # Fusionner par année
+        st.subheader("Arrivées touristiques par année et par trimestre")
+        df_merge = pd.merge(somme_trimestrielle, somme_annuelle_arrivees[["Année", "Arrivees"]], left_on="Année", right_on="Année", how="inner")
+        fig = px.bar(
+        df_merge,
+        x="Année",
+        y="Arrivees_x",
+        color="Trimestre",    
+        barmode="group",      
+        # title="Arrivées touristiques par année et par trimestre",
+        )
 
-    somme_annuelle_arrivees = filtered_data_trimestre.groupby("Année")["Arrivees"].sum().reset_index()
-# Fusionner par année
-    df_merge = pd.merge(somme_trimestrielle, somme_annuelle_arrivees[["Année", "Arrivees"]], left_on="Année", right_on="Année", how="inner")
-    fig = px.bar(
-    df_merge,
-    x="Année",
-    y="Arrivees_x",
-    color="Trimestre",    
-    barmode="group",      
-    title="Arrivées touristiques par année et par trimestre",
-    )
-
-    fig.update_layout(
-    xaxis_title="Année",
-    yaxis_title="Arrivées",
-    legend_title="Trimestre",
-    template="plotly_white",
-    legend=dict(
-        orientation="v",
-        yanchor="top",
-        y=1,
-        xanchor="left",
-        x=1.02           
-    )
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
+        fig.update_layout(
+        xaxis_title="Année",
+        yaxis_title="Arrivées",
+        legend_title="Trimestre",
+        template="plotly_white",
+        legend=dict(
+            orientation="v",
+            yanchor="top",
+            y=1,
+            xanchor="left",
+            x=1.02           
+        )
+        )
+        st.plotly_chart(fig, use_container_width=True)
     
     # Prevision arrivees touristiques 
         # Sélection des colonnes utiles
-    # Somme annuelle des arrivées
-    df_yearly = filtered_data.groupby("Année", as_index=False)["Arrivees"].sum()
-    X = df_yearly[["Arrivees"]]
-    y = df_yearly['Arrivees'].fillna(df_yearly['Arrivees'].mean())
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    with col2:
+        # Somme annuelle des arrivées
+        df_yearly = filtered_data.groupby("Année", as_index=False)["Arrivees"].sum()
+        X = df_yearly[["Arrivees"]]
+        y = df_yearly['Arrivees'].fillna(df_yearly['Arrivees'].mean())
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Modèle Random Forest
-    rf_reg = RandomForestRegressor(n_estimators=400, max_depth=5, random_state=42)
-    rf_reg.fit(X_train, y_train)
+    # Modèle Random Forest
+        rf_reg = RandomForestRegressor(n_estimators=400, max_depth=5, random_state=42)
+        rf_reg.fit(X_train, y_train)
 
-# Prédictions
-    df_yearly['Prévision Arrivées'] = rf_reg.predict(X)
-# Sélection de la dernière année disponible
-    latest_Année = df_yearly['Année'].max()
-    latest_data = df_yearly[df_yearly['Année'] == latest_Année]
+    # Prédictions
+        df_yearly['Prévision Arrivées'] = rf_reg.predict(X)
+    # Sélection de la dernière année disponible
+        latest_Année = df_yearly['Année'].max()
+        latest_data = df_yearly[df_yearly['Année'] == latest_Année]
 
-# Prévions futures
-    future_Années = np.array(range(max_Année + 1, max_Année + 5)).reshape(-1, 1)
+    # Prévions futures
+        future_Années = np.array(range(max_Année + 1, max_Année + 5)).reshape(-1, 1)
 
-    def forecast_trend(variable):
-        """Prévoit la tendance d'une variable en utilisant une régression linéaire."""
-        Années = df_yearly['Année'].values.reshape(-1, 1)
-        values = df_yearly[variable].values
-        if np.isnan(values).any():
-            raise ValueError(f"Des valeurs manquantes existent dans {variable}")
-        model_trend = LinearRegression()
-        model_trend.fit(Années, values)
-        future_values = model_trend.predict(future_Années)
-        noise = np.random.uniform(-0.5, 0.5, size=future_values.shape)
-        return future_values + noise
-    variables = ['Arrivees']
-    future_exog = pd.DataFrame({var: forecast_trend(var) for var in variables})
-    future_forecast = rf_reg.predict(future_exog)
-    forecast_arrivee = pd.DataFrame({
-        'Année': list(df_yearly['Année']) + list(future_Années.flatten()),
-        'Arrivées': list(df_yearly['Arrivees']) + [np.nan] * len(future_Années), 
-        'Prévision Arrivées': list(df_yearly['Prévision Arrivées'])+ list(future_forecast)
-    })
-    fig = px.line(
-        forecast_arrivee,
-        x="Année",
-        y="Prévision Arrivées",
-        title="Évolution des arrivées touristiques et sa prévision de 5 ans",
-        line_shape='spline',      
-        color_discrete_sequence=['#1f77b4'] 
-        )
-    st.plotly_chart(fig, use_container_width=True)
+        def forecast_trend(variable):
+            """Prévoit la tendance d'une variable en utilisant une régression linéaire."""
+            Années = df_yearly['Année'].values.reshape(-1, 1)
+            values = df_yearly[variable].values
+            if np.isnan(values).any():
+                raise ValueError(f"Des valeurs manquantes existent dans {variable}")
+            model_trend = LinearRegression()
+            model_trend.fit(Années, values)
+            future_values = model_trend.predict(future_Années)
+            noise = np.random.uniform(-0.5, 0.5, size=future_values.shape)
+            return future_values + noise
+        variables = ['Arrivees']
+        future_exog = pd.DataFrame({var: forecast_trend(var) for var in variables})
+        future_forecast = rf_reg.predict(future_exog)
+        forecast_arrivee = pd.DataFrame({
+            'Année': list(df_yearly['Année']) + list(future_Années.flatten()),
+            'Arrivées': list(df_yearly['Arrivees']) + [np.nan] * len(future_Années), 
+            'Prévision Arrivées': list(df_yearly['Prévision Arrivées'])+ list(future_forecast)
+        })
+        st.subheader("Évolution des arrivées touristiques et sa prévision de 4 ans")
+        fig = px.line(
+            forecast_arrivee,
+            x="Année",
+            y="Prévision Arrivées",
+            # title="Évolution des arrivées touristiques et sa prévision de 4 ans",
+            line_shape='spline',      
+            color_discrete_sequence=['#1f77b4'] 
+            )
+        st.plotly_chart(fig, use_container_width=True)
     # Heatmap pour les arrivées touristiques
     
     # Pivot pour la heatmap
@@ -509,6 +506,7 @@ Celà montre comment les arrivées influencent l’évolution globale des recett
     heatmap_long = heatmap_data.reset_index().melt(id_vars='Année', var_name='Mois', value_name='Arrivees')
 
     # Création de la heatmap interactive
+    st.subheader("Heatmap interactive des arrivées touristiques")
     fig = px.imshow(
         heatmap_data.values,
         x=heatmap_data.columns,
@@ -518,7 +516,7 @@ Celà montre comment les arrivées influencent l’évolution globale des recett
     )
 
     fig.update_layout(
-        title="Heatmap interactive des arrivées touristiques",
+        # title="Heatmap interactive des arrivées touristiques",
         xaxis_title="Mois",
         yaxis_title="Année"
     )
@@ -540,6 +538,7 @@ Celà montre comment les arrivées influencent l’évolution globale des recett
         var_name="Type",
         value_name="Valeurs"
         )
+        st.subheader("Recettes et dépenses actuelles du tourisme")
 
     # Graphique empilé avec hover
         fig = px.bar(
@@ -548,7 +547,7 @@ Celà montre comment les arrivées influencent l’évolution globale des recett
         y="Valeurs",
         color="Type",
         labels={"Valeurs": "Valeurs", "Année": "Année", "Type": "Indicateur"},
-        title="Recettes et dépenses actuelles du tourisme",
+        # title="Recettes et dépenses actuelles du tourisme",
         color_discrete_map={"recettes actuel": "#1f77b4", "dépenses actuel": "#063970"}
         )
 
@@ -736,7 +735,6 @@ Celà montre comment les arrivées influencent l’évolution globale des recett
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    st.title("Solde budgétaire")
 # --- Calcul du solde
     df_solde = filtered_data.groupby("Année", as_index=False)[["recettes actuel","dépenses actuel"]].sum()
     df_solde["Solde"] = df_solde["recettes actuel"] - df_solde["dépenses actuel"]
@@ -776,17 +774,17 @@ Celà montre comment les arrivées influencent l’évolution globale des recett
     forecast_solde = pd.DataFrame({
         'Année': list(df_solde['Année']) + list(future_Années.flatten()),
         'Solde': list(df_solde['Solde']) + [np.nan] * len(future_Années), 
-        'Prévision Solde': list(df_solde['Prévision Solde'])+ list(future_forecast)
+        'Valeur': list(df_solde['Prévision Solde'])+ list(future_forecast)
     })
+    st.subheader("Évolution du solde de Madagascar et sa prévision de 4 ans")
     fig = px.line(
         forecast_solde,
     x="Année",
-    y="Prévision Solde",
-    title="Évolution du solde de Madagascar et sa prévision de 5 ans",
+    y="Valeur",
+    # title="Évolution du solde de Madagascar et sa prévision de 5 ans",
     line_shape='spline',      
     color_discrete_sequence=['#1f77b4'] 
         )
     st.plotly_chart(fig, use_container_width=True)
     return filtered_data, forecast_arrivee, forecast_solde, selected_Années, selected_specific_years, selected_specific_trimestre
-data=get_data()
-
+data = get_data()

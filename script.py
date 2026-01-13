@@ -788,4 +788,5 @@ Celà montre comment les arrivées influencent l’évolution globale des recett
         )
     st.plotly_chart(fig, use_container_width=True)
     return filtered_data, forecast_arrivee, forecast_solde, selected_Années, selected_specific_years, selected_specific_trimestre
+data=get_data()
 

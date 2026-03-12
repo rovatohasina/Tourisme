@@ -55,16 +55,12 @@ def get_data_final():
 # Embedding des documents
 def embed_data_final_and_check(df):
     embed_model = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
-
-    # WBData
     wbdata_texts = df['text'].tolist()
     wbdata_embeddings = embed_model.embed_documents(wbdata_texts)
     wb_vectors = [(text, vec, "wbdata") for text, vec in zip(wbdata_texts, wbdata_embeddings)]
-    # 5. Affichage pour vérification
-
+    
+    # Affichage pour vérification
     for i, emb in enumerate(wbdata_embeddings[:3]):
         print(f"WBData Embedding {i} : {len(emb)} dimensions")
-
-    # Combiner les deux
     return wb_vectors
 

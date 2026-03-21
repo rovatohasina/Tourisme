@@ -111,9 +111,32 @@ with st.sidebar:
         somme_trimestrielle = filtered_data_trimestre.groupby(["Année", "Trimestre"])["Arrivees"].sum().reset_index()
        
 
-# ====== SVG ICONS ======
+# ====== SVG RESPONSIVE ======
+svg_arrivees = """
+<svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M2.5 19l19-7-19-7v5l13 2-13 2z"/>
+</svg>
+"""
 
-# ================= STYLE GLOBAL =================
+svg_recettes = """
+<svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 21V3M19 14l-7-7-7 7"/>
+</svg>
+"""
+
+svg_depenses = """
+<svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 1v22M5 6h9a4 4 0 010 8H7a4 4 0 000 8h12"/>
+</svg>
+"""
+
+svg_solde = """
+<svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M3 12h18M12 3v18"/>
+</svg>
+"""
+
+# ====== STYLE GLOBAL ======
 st.markdown("""
 <style>
 .card {
@@ -130,13 +153,12 @@ st.markdown("""
 }
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0px 6px 20px rgba(0,0,0,0.8);
 }
 
 .icon-box {
-    width: 45px;
-    height: 45px;
-    color: white;
+    width: 50px;
+    height: 50px;
+    color: white;  /* contrôle couleur SVG */
 }
 
 .icon-box svg {
@@ -156,39 +178,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ================= SVG ICONS (STYLE UNIFORME) =================
-
-svg_arrivees = """
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M2 16l20-6-20-6v5l12 1-12 1z"/>
-</svg>
-"""
-
-svg_recettes = """
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M12 19V5"/>
-  <path d="M5 12l7-7 7 7"/>
-</svg>
-"""
-
-svg_depenses = """
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M12 5v14"/>
-  <path d="M19 12l-7 7-7-7"/>
-</svg>
-"""
-
-svg_solde = """
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M12 3v18"/>
-  <path d="M5 8h14"/>
-  <path d="M6 8l-3 5h6z"/>
-  <path d="M18 8l-3 5h6z"/>
-</svg>
-"""
-
-# ================= CALCUL KPI =================
-
+# ====== CALCUL KPI ======
 last_year = filtered_data["Année"].max()
 last_year_data = filtered_data[filtered_data["Année"] == last_year]
 
@@ -197,8 +187,7 @@ total_recettes = last_year_data["recettes actuel"].sum() if "recettes actuel" in
 total_depenses = last_year_data["dépenses actuel"].sum() if "dépenses actuel" in last_year_data else 0
 total_soldes = last_year_data["Solde"].sum() if "Solde" in last_year_data else 0
 
-# ================= FUNCTION CARD =================
-
+# ====== FUNCTION CARD ======
 def card(icon, label, value):
     return f"""
     <div class="card">
@@ -212,76 +201,20 @@ def card(icon, label, value):
     </div>
     """
 
-# ================= AFFICHAGE =================
-
+# ====== DISPLAY ======
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.markdown(card(
-        svg_arrivees,
-        "Nb Arrivées",
-        f"{total_arrivees:,.0f}".replace(",", " ")
-    ), unsafe_allow_html=True)
+    st.markdown(card(svg_arrivees, "Nb Arrivées", f"{total_arrivees:,.0f}".replace(",", " ")), unsafe_allow_html=True)
 
 with col2:
-    st.markdown(card(
-        svg_recettes,
-        "Recettes",
-        f"{total_recettes:,.0f}".replace(",", " ")
-    ), unsafe_allow_html=True)
+    st.markdown(card(svg_recettes, "Recettes", f"{total_recettes:,.0f}".replace(",", " ")), unsafe_allow_html=True)
 
 with col3:
-    st.markdown(card(
-        svg_depenses,
-        "Dépenses",
-        f"{total_depenses:,.0f}".replace(",", " ")
-    ), unsafe_allow_html=True)
+    st.markdown(card(svg_depenses, "Dépenses", f"{total_depenses:,.0f}".replace(",", " ")), unsafe_allow_html=True)
 
 with col4:
-    st.markdown(card(
-        svg_solde,
-        "Solde",
-        f"{total_soldes:,.0f}".replace(",", " ")
-    ), unsafe_allow_html=True)
- # ====== Calcul des KPI ======
-# Dernière année disponible dans filtered_data
-last_year = filtered_data["Année"].max()
-# Données seulement pour cette dernière année
-last_year_data = filtered_data[filtered_data["Année"] == last_year]  
-        
-total_arrivees = last_year_data["Arrivees"].sum() if "Arrivees" in last_year_data else 0
-total_recettes = last_year_data["recettes actuel"].sum() if "recettes actuel" in last_year_data else 0
-total_depenses = last_year_data["dépenses actuel"].sum() if "dépenses actuel" in last_year_data else 0
-total_soldes = last_year_data["Solde"].sum() if "Solde" in last_year_data else 0
-
-col1, col2, col3, col4 = st.columns(4)
-card_style = """
-        <div style="
-            border: 2px solid #00BCD4;  /* contour bleu clair */
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            background-color: #1E1E1E;  /* fond sombre */
-            color: #FFFFFF;              /* texte blanc */
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-            font-size: 24px;
-            font-weight: bold;
-        ">
-            {label}<br>{value}
-        </div>
-    """
-
-with col1:
-    st.markdown(card_style.format(label="✈️ Nb Arrivées", value=f"{total_arrivees:,.0f}".replace(",", " ")), unsafe_allow_html=True)
-
-with col2:
-    st.markdown(card_style.format(label="💰 Recettes", value=f"{total_recettes:,.0f}".replace(",", " ")), unsafe_allow_html=True)
-
-with col3:
-    st.markdown(card_style.format(label="📉 Dépenses", value=f"{total_depenses:,.0f}".replace(",", " ")), unsafe_allow_html=True)
-        
-with col4:
-    st.markdown(card_style.format(label="⚖️ Soldes", value=f"{total_soldes:,.0f}".replace(",", " ")), unsafe_allow_html=True)
+    st.markdown(card(svg_solde, "Solde", f"{total_soldes:,.0f}".replace(",", " ")), unsafe_allow_html=True)
       
     # Sélecteur de type d'indicateur
 df_yearly = filtered_data.groupby("Année", as_index=False)[

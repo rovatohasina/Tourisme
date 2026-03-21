@@ -109,8 +109,12 @@ with st.sidebar:
         if error_message:
             st.sidebar.error(error_message)
             
-                    # ====== Calcul des KPI ======
-total_recettes = filtered_data_specific["Arrivees"].sum() if "Arrivees" in filtered_data_specific else 0
+        # ====== Calcul des KPI ======
+# Dernière année disponible dans filtered_data
+last_year = filtered_data["Année"].max()
+# Données seulement pour cette dernière année
+last_year_data = filtered_data[filtered_data["Année"] == last_year] 
+total_recettes = last_year_data["recettes actuel"].sum() if "recettes actuel" in last_year_data else 0
 
 col1, col2, col3, col4 = st.columns(4)
 card_style = """

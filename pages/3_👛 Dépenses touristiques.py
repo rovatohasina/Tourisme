@@ -110,7 +110,12 @@ with st.sidebar:
             st.sidebar.error(error_message)
         
         # ====== Calcul des KPI ======
-total_depenses = filtered_data_specific["Arrivees"].sum() if "Arrivees" in filtered_data_specific else 0
+# Dernière année disponible dans filtered_data
+last_year = filtered_data["Année"].max()
+# Données seulement pour cette dernière année
+last_year_data = filtered_data[filtered_data["Année"] == last_year]  
+        
+total_depenses = last_year_data["dépenses actuel"].sum() if "dépenses actuel" in last_year_data else 0
 
 col1, col2, col3, col4 = st.columns(4)
 card_style = """

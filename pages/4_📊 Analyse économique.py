@@ -213,130 +213,76 @@ with col2:
             st.error("Colonnes 'Arrivees' et 'Recettes' manquantes.")
 col1, col2 = st.columns(2)
 with col1:
-            # --- Calcul des valeurs annuelles ---
-            df_yearly = filtered_data.groupby("Année", as_index=False)["recettes % des exportations"].sum()
+        # --- Calcul des valeurs annuelles ---
+        df_yearly = filtered_data.groupby("Année", as_index=False)["recettes % des exportations"].sum()
 
-            # --- Calcul de la variation en % par rapport à l'année précédente ---
-            df_yearly['pct_change'] = df_yearly['recettes % des exportations'].pct_change() * 100
+        # --- Calcul de la variation en % par rapport à l'année précédente ---
+        df_yearly['pct_change'] = df_yearly['recettes % des exportations'].pct_change() * 100
 
-            # --- Créer le graphique ---
-            fig = px.line(
-                df_yearly,
-                x="Année",
-                y="recettes % des exportations",
-                title="recettes touristiques par rapport aux exportations",
-                markers=True,
-                color_discrete_sequence=['#1f77b4']
-            )
-            st.plotly_chart(fig, use_container_width=True)
+        # --- Définir la couleur selon la variation ---
+        df_yearly['color'] = df_yearly['pct_change'].apply(lambda x: 'green' if x > 0 else ('red' if x < 0 else 'blue'))
 
-            # --- Pagination du tableau ---
-            rows_per_page = 5
-            if 'page_recettes' not in st.session_state:
-                st.session_state.page_recettes = 0
+        # --- Créer le graphique ---
+        fig = px.line(
+            df_yearly,
+            x="Année",
+            y="recettes % des exportations",
+            title="Parts du tourisme dans les exportations",
+            markers=True,  # Affiche les points
+            color_discrete_sequence=['#1f77b4']  # couleur personnalisée
 
-with col2:
-            # --- Contrôles de pagination ---
-            c_prev, c_next = st.columns(2)
-            with c_prev:
-                if st.button("⬅️ Précédent", key="prev_recttes", use_container_width=True) and st.session_state.page_recettes > 0:
-                    st.session_state.page_recettes -= 1
-            with c_next:
-                if st.button("Suivant ➡️", key="next_recettes", use_container_width=True) and (st.session_state.page_recettes + 1) * rows_per_page < len(df_yearly):
-                    st.session_state.page_recettes += 1
+        )
 
-            # --- Préparation des données de la page ---
-            start = st.session_state.page_recettes * rows_per_page
-            end = start + rows_per_page
-            df_page = df_yearly.iloc[start:end][["Année", "recettes % des exportations", "pct_change"]].copy()
-            
-            # --- Affichage avec configuration inversée ---
-            st.dataframe(
-                df_page,
-                column_config={
-                    "Année": st.column_config.TextColumn("Année"),
-                    
-                    # Affichage en valeur simple (Nombre)
-                    "recettes % des exportations": st.column_config.NumberColumn(
-                        "recettes (%)",
-                        help="Valeur brute des recettes",
-                    ),
-                    
-                    # Affichage en barre de progression pour la Variation
-                    "pct_change": st.column_config.ProgressColumn(
-                        "Variation (%)",
-                        help="Intensité du changement par rapport à l'année précédente",
-                        format="%.2f%%",
-                        min_value=-100, # Les variations peuvent être négatives
-                        max_value=100
-                    )
-                },
-                hide_index=True,
-                use_container_width=True
-            )
-col1, col2 = st.columns(2)
-with col1:
-            # --- Calcul des valeurs annuelles ---
-            df_yearly = filtered_data.groupby("Année", as_index=False)["dépenses % des importations"].sum()
+        # --- Ajouter les annotations (pourcentage sur chaque point) ---
+        for i, row in df_yearly.iterrows():
+            if pd.notna(row['pct_change']):  # Ignorer la première année (pas de variation)
+                fig.add_annotation(
+                    x=row['Année'],
+                    y=row['recettes % des exportations'],
+                    text=f"{row['pct_change']:.1f}%",
+                    showarrow=False,
+                    arrowhead=1,
+                    arrowcolor=row['color'],
+                    font=dict(color=row['color']),
+                    yshift=15
+                )
 
-            # --- Calcul de la variation en % par rapport à l'année précédente ---
-            df_yearly['pct_change'] = df_yearly['dépenses % des importations'].pct_change() * 100
-
-            # --- Créer le graphique ---
-            fig = px.line(
-                df_yearly,
-                x="Année",
-                y="dépenses % des importations",
-                title="Dépenses touristiques par rapport aux importations",
-                markers=True,
-                color_discrete_sequence=['#1f77b4']
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-            # --- Pagination du tableau ---
-            rows_per_page = 5
-            if 'page_depenses' not in st.session_state:
-                st.session_state.page_depenses = 0
+        st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-            # --- Contrôles de pagination ---
-            c_prev, c_next = st.columns(2)
-            with c_prev:
-                if st.button("⬅️ Précédent", key="prev_depenses", use_container_width=True) and st.session_state.page_depenses > 0:
-                    st.session_state.page_depenses -= 1
-            with c_next:
-                if st.button("Suivant ➡️", key="next_depenses", use_container_width=True) and (st.session_state.page_depenses + 1) * rows_per_page < len(df_yearly):
-                    st.session_state.page_depenses += 1
+                # Somme annuelle des arrivées
+        df_yearly = filtered_data.groupby("Année", as_index=False)["dépenses % des importations"].sum()
+        # --- Calcul de la variation en % par rapport à l'année précédente ---
+        df_yearly['pct_change'] = df_yearly['dépenses % des importations'].pct_change() * 100
 
-            # --- Préparation des données de la page ---
-            start = st.session_state.page_depenses * rows_per_page
-            end = start + rows_per_page
-            df_page = df_yearly.iloc[start:end][["Année", "dépenses % des importations", "pct_change"]].copy()
-            
-            # --- Affichage avec configuration inversée ---
-            st.dataframe(
-                df_page,
-                column_config={
-                    "Année": st.column_config.TextColumn("Année"),
-                    
-                    # Affichage en valeur simple (Nombre)
-                    "dépenses % des importations": st.column_config.NumberColumn(
-                        "Dépenses (%)",
-                        help="Valeur brute des dépenses",
-                    ),
-                    
-                    # Affichage en barre de progression pour la Variation
-                    "pct_change": st.column_config.ProgressColumn(
-                        "Variation (%)",
-                        help="Intensité du changement par rapport à l'année précédente",
-                        format="%.2f%%",
-                        min_value=-100, # Les variations peuvent être négatives
-                        max_value=100
-                    )
-                },
-                hide_index=True,
-                use_container_width=True
+        # --- Définir la couleur selon la variation ---
+        df_yearly['color'] = df_yearly['pct_change'].apply(lambda x: 'green' if x > 0 else ('red' if x < 0 else 'blue'))
+
+        # Création du graphique stylé
+        fig = px.line(
+            df_yearly,
+            x="Année",
+            y="dépenses % des importations",
+            title="Dépenses touristique par rapport aux importations",
+            markers=True,
+                   # affiche des points sur la ligne
+            # line_shape='spline',          # ligne lisse
+            color_discrete_sequence=['#1f77b4']  # couleur personnalisée
             )
+        # --- Ajouter les annotations (pourcentage sur chaque point) ---
+        for i, row in df_yearly.iterrows():
+            if pd.notna(row['pct_change']):  # Ignorer la première année (pas de variation)
+                fig.add_annotation(
+                    x=row['Année'],
+                    y=row['dépenses % des importations'],
+                    text=f"{row['pct_change']:.1f}%",
+                    showarrow=False,
+                    arrowhead=1,
+                    arrowcolor=row['color'],
+                    font=dict(color=row['color']),
+                    yshift=15
+                )
+        st.plotly_chart(fig, use_container_width=True)
 #Recettes vs dépenses actuels
 if "recettes actuel" in filtered_data_trimestre.columns and "dépenses actuel" in filtered_data_trimestre.columns:
         somme_annuelle_rec = filtered_data_trimestre.groupby("Année")["recettes actuel"].sum().reset_index()

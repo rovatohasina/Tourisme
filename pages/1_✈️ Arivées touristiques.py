@@ -109,12 +109,12 @@ else:
 if error_message:
     st.sidebar.error(error_message)
 
-# ====== SVG ICONS ======
 svg_arrivees = """
 <svg width="35" height="35" viewBox="0 0 24 24" fill="#FFFFFF">
     <path d="M2.5 19l19-7-19-7v5l13 2-13 2z"/>
 </svg>
 """
+
 # ====== STYLE CARD ======
 card_style = """
 <div style="
@@ -135,29 +135,23 @@ card_style = """
     </div>
 </div>
 """
+
+# ====== CALCUL KPI ======
+last_year = filtered_data["Année"].max()
+last_year_data = filtered_data[filtered_data["Année"] == last_year]
+
+total_arrivees = last_year_data["Arrivees"].sum() if "Arrivees" in last_year_data else 0
+
+# ====== DISPLAY ======
 col1, col2, col3, col4 = st.columns(4)
-card_style = """
-        <div style="
-            border: 2px solid #00BCD4;  /* contour bleu clair */
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            background-color: #1E1E1E;  /* fond sombre */
-            color: #FFFFFF;              /* texte blanc */
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-            font-size: 24px;
-            font-weight: bold;
-        ">
-            {label}<br>{value}
-        </div>
-    """
 
 with col1:
-        st.markdown(card_style.format(
+    st.markdown(card_style.format(
         icon=svg_arrivees,
         label="Nb Arrivées",
         value=f"{total_arrivees:,.0f}".replace(",", " ")
     ), unsafe_allow_html=True)
+
 
 col1, col2 = st.columns(2)
 with col1:

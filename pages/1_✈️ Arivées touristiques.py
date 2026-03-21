@@ -153,7 +153,7 @@ card_style = """
     """
 
 with col1:
-    st.markdown(card_style.format(
+        st.markdown(card_style.format(
         icon=svg_arrivees,
         label="Nb Arrivées",
         value=f"{total_arrivees:,.0f}".replace(",", " ")

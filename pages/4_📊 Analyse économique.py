@@ -171,9 +171,6 @@ with col2:
         # --- AFFICHAGE DES RÉSULTATS ---
         # =================================
         st.subheader("Analyse statistique et détection des anomalies")
-        st.markdown(f"""
-        Coefficient de corrélation: **{correlation:.3f}**
-        """)
         
         # Detection d'anomalie
         if "Arrivees" in df_merge.columns and "Recettes" in df_merge.columns:

@@ -108,7 +108,39 @@ else:
         # ---- Affichage de l'erreur (en bas de l’input) ----
 if error_message:
     st.sidebar.error(error_message)
-            
+
+# ====== SVG ICONS ======
+svg_arrivees = """
+<svg width="35" height="35" viewBox="0 0 24 24" fill="#FFFFFF">
+    <path d="M2.5 19l19-7-19-7v5l13 2-13 2z"/>
+</svg>
+"""
+# ====== STYLE CARD ======
+card_style = """
+<div style="
+    border: 2px solid #00BCD4;
+    border-radius: 12px;
+    padding: 20px;
+    background-color: #1E1E1E;
+    color: #FFFFFF;
+    box-shadow: 2px 2px 12px rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+">
+    <div>{icon}</div>
+    <div>
+        <div style="font-size:14px; color:#B0BEC5;">{label}</div>
+        <div style="font-size:22px; font-weight:bold;">{value}</div>
+    </div>
+</div>
+"""
+
+# ====== CALCUL KPI ======
+last_year = filtered_data["Année"].max()
+last_year_data = filtered_data[filtered_data["Année"] == last_year]
+
+total_arrivees = last_year_data["Arrivees"].sum() if "Arrivees" in last_year_data else 0   
 # Dernière année disponible dans filtered_data
 last_year = filtered_data["Année"].max()
 # Données seulement pour cette dernière année

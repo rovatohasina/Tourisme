@@ -135,19 +135,6 @@ card_style = """
     </div>
 </div>
 """
-
-# ====== CALCUL KPI ======
-last_year = filtered_data["Année"].max()
-last_year_data = filtered_data[filtered_data["Année"] == last_year]
-
-total_arrivees = last_year_data["Arrivees"].sum() if "Arrivees" in last_year_data else 0   
-# Dernière année disponible dans filtered_data
-last_year = filtered_data["Année"].max()
-# Données seulement pour cette dernière année
-last_year_data = filtered_data[filtered_data["Année"] == last_year]  
-        
-total_arrivees = last_year_data["Arrivees"].sum() if "Arrivees" in last_year_data else 0
-
 col1, col2, col3, col4 = st.columns(4)
 card_style = """
         <div style="
@@ -166,8 +153,11 @@ card_style = """
     """
 
 with col1:
-    st.markdown(card_style.format(label="✈️ Nb Arrivées", value=f"{total_arrivees:,.0f}".replace(",", " ")), unsafe_allow_html=True)
-
+    st.markdown(card_style.format(
+        icon=svg_arrivees,
+        label="Nb Arrivées",
+        value=f"{total_arrivees:,.0f}".replace(",", " ")
+    ), unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 with col1:

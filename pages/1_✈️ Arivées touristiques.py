@@ -109,8 +109,12 @@ else:
 if error_message:
     st.sidebar.error(error_message)
             
-        # ====== Calcul des KPI ======
-total_arrivees = filtered_data_specific["Arrivees"].sum() if "Arrivees" in filtered_data_specific else 0
+# Dernière année disponible dans filtered_data
+last_year = filtered_data["Année"].max()
+# Données seulement pour cette dernière année
+last_year_data = filtered_data[filtered_data["Année"] == last_year]  
+        
+total_arrivees = last_year_data["Arrivees"].sum() if "Arrivees" in last_year_data else 0
 
 col1, col2, col3, col4 = st.columns(4)
 card_style = """
@@ -130,7 +134,7 @@ card_style = """
     """
 
 with col1:
-    st.markdown(card_style.format(label="✈️ Nb Arrivées", value=f"{total_arrivees:,.0f}"), unsafe_allow_html=True)
+    st.markdown(card_style.format(label="✈️ Nb Arrivées", value=f"{total_arrivees:,.0f}".replace(",", " ")), unsafe_allow_html=True)
 
 
 col1, col2 = st.columns(2)

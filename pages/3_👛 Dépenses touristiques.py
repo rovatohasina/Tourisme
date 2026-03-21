@@ -135,7 +135,7 @@ card_style = """
     """
 
 with col1:
-    st.markdown(card_style.format(label="📉 Dépenses", value=f"{total_depenses:,.0f}"), unsafe_allow_html=True)
+    st.markdown(card_style.format(label="📉 Dépenses", value=f"{total_depenses:,.0f}".replace(",", " ")), unsafe_allow_html=True)
 col1, col2 = st.columns(2)
 with col1:
         somme_annuelle_depenses1 = filtered_data_trimestre.groupby("Année")["dépenses pour le transport"].sum().reset_index()

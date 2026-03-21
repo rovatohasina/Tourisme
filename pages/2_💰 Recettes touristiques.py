@@ -134,7 +134,7 @@ card_style = """
     """
 
 with col1:
-    st.markdown(card_style.format(label="💰 Recettes", value=f"{total_recettes:,.0f}"), unsafe_allow_html=True)
+    st.markdown(card_style.format(label="💰 Recettes", value=f"{total_recettes:,.0f}".replace(",", " ")), unsafe_allow_html=True)
 col1, col2 = st.columns(2)
 with col1:
         somme_annuelle_recettes1 = filtered_data_trimestre.groupby("Année")["recettes pour les articles de transport"].sum().reset_index()

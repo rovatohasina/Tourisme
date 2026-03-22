@@ -109,33 +109,72 @@ with st.sidebar:
         if error_message:
             st.sidebar.error(error_message)
         
-        # ====== Calcul des KPI ======
-# Dernière année disponible dans filtered_data
-last_year = filtered_data["Année"].max()
-# Données seulement pour cette dernière année
-last_year_data = filtered_data[filtered_data["Année"] == last_year]  
-        
-total_depenses = last_year_data["dépenses actuel"].sum() if "dépenses actuel" in last_year_data else 0
+# ====== SVG ICONS ======
+svg_arrivees = """
+<svg width="35" height="35" viewBox="0 0 24 24" fill="#FFFFFF">
+    <path d="M2.5 19l19-7-19-7v5l13 2-13 2z"/>
+</svg>
+"""
 
-col1, col2, col3, col4 = st.columns(4)
+svg_recettes = """
+<svg width="35" height="35" viewBox="0 0 24 24" fill="#FFFFFF">
+    <path d="M12 21V3M19 14l-7-7-7 7"/>
+</svg>
+"""
+
+svg_depenses = """
+<svg width="35" height="35" viewBox="0 0 24 24" fill="#FFFFFF">
+    <path d="M12 1v22M5 6h9a4 4 0 010 8H7a4 4 0 000 8h12"/>
+</svg>
+"""
+
+svg_solde = """
+<svg width="35" height="35" viewBox="0 0 24 24" fill="#FFFFFF">
+    <path d="M3 12h18M12 3v18"/>
+</svg>
+"""
+
+# ====== STYLE CARD ======
 card_style = """
-        <div style="
-            border: 2px solid #00BCD4;  /* contour bleu clair */
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            background-color: #1E1E1E;  /* fond sombre */
-            color: #FFFFFF;              /* texte blanc */
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-            font-size: 24px;
-            font-weight: bold;
-        ">
-            {label}<br>{value}
-        </div>
-    """
+<div style="
+    border: 2px solid #00BCD4;
+    border-radius: 12px;
+    padding: 20px;
+    background-color: #1E1E1E;
+    color: #FFFFFF;
+    box-shadow: 2px 2px 12px rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+">
+    <div>{icon}</div>
+    <div>
+        <div style="font-size:14px; color:#B0BEC5;">{label}</div>
+        <div style="font-size:22px; font-weight:bold;">{value}</div>
+    </div>
+</div>
+"""
+
+# ====== CALCUL KPI ======
+last_year = filtered_data["Année"].max()
+last_year_data = filtered_data[filtered_data["Année"] == last_year]
+
+total_arrivees = last_year_data["Arrivees"].sum() if "Arrivees" in last_year_data else 0
+total_recettes = last_year_data["recettes actuel"].sum() if "recettes actuel" in last_year_data else 0
+total_depenses = last_year_data["dépenses actuel"].sum() if "dépenses actuel" in last_year_data else 0
+total_soldes = last_year_data["Solde"].sum() if "Solde" in last_year_data else 0
+
+# ====== DISPLAY ======
+col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.markdown(card_style.format(label="📉 Dépenses", value=f"{total_depenses:,.0f}".replace(",", " ")), unsafe_allow_html=True)
+    st.markdown(card_style.format(
+        icon=svg_depenses,
+        label="Dépenses",
+        value=f"{total_depenses:,.0f}".replace(",", " ")
+    ), unsafe_allow_html=True)
+
+
 col1, col2 = st.columns(2)
 with col1:
         somme_annuelle_depenses1 = filtered_data_trimestre.groupby("Année")["dépenses pour le transport"].sum().reset_index()

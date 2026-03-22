@@ -109,6 +109,68 @@ else:
 if error_message:
     st.sidebar.error(error_message)
 
+# ====== SVG ICONS ======
+svg_arrivees = """
+<svg width="35" height="35" viewBox="0 0 24 24" fill="#FFFFFF">
+    <path d="M2.5 19l19-7-19-7v5l13 2-13 2z"/>
+</svg>
+"""
+
+svg_recettes = """
+<svg width="35" height="35" viewBox="0 0 24 24" fill="#FFFFFF">
+    <path d="M12 21V3M19 14l-7-7-7 7"/>
+</svg>
+"""
+
+svg_depenses = """
+<svg width="35" height="35" viewBox="0 0 24 24" fill="#FFFFFF">
+    <path d="M12 1v22M5 6h9a4 4 0 010 8H7a4 4 0 000 8h12"/>
+</svg>
+"""
+
+svg_solde = """
+<svg width="35" height="35" viewBox="0 0 24 24" fill="#FFFFFF">
+    <path d="M3 12h18M12 3v18"/>
+</svg>
+"""
+
+# ====== STYLE CARD ======
+card_style = """
+<div style="
+    border: 2px solid #00BCD4;
+    border-radius: 12px;
+    padding: 20px;
+    background-color: #1E1E1E;
+    color: #FFFFFF;
+    box-shadow: 2px 2px 12px rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+">
+    <div>{icon}</div>
+    <div>
+        <div style="font-size:14px; color:#B0BEC5;">{label}</div>
+        <div style="font-size:22px; font-weight:bold;">{value}</div>
+    </div>
+</div>
+"""
+
+# ====== CALCUL KPI ======
+last_year = filtered_data["Année"].max()
+last_year_data = filtered_data[filtered_data["Année"] == last_year]
+
+total_arrivees = last_year_data["Arrivees"].sum() if "Arrivees" in last_year_data else 0
+
+# ====== DISPLAY ======
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    st.markdown(card_style.format(
+        icon=svg_arrivees,
+        label="Nb Arrivées",
+        value=f"{total_arrivees:,.0f}".replace(",", " ")
+    ), unsafe_allow_html=True)
+
 
 col1, col2 = st.columns(2)
 with col1:

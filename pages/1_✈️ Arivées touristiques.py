@@ -109,11 +109,6 @@ else:
 if error_message:
     st.sidebar.error(error_message)
 
-svg_arrivees = """
-<svg width="35" height="35" viewBox="0 0 24 24" fill="#FFFFFF">
-    <path d="M2.5 19l19-7-19-7v5l13 2-13 2z"/>
-</svg>
-"""
 
 col1, col2 = st.columns(2)
 with col1:

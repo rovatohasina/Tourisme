@@ -110,55 +110,6 @@ with st.sidebar:
             st.sidebar.error(error_message)
         somme_trimestrielle = filtered_data_trimestre.groupby(["Année", "Trimestre"])["Arrivees"].sum().reset_index()
 
-st.markdown("""
-<style>
-
-/* HEADER FIXE */
-.custom-header {
-    position: fixed;
-    top: 0;
-      /* 🔥 important */
-    right: 0;
-
-    height: 70px;
-    display: flex;
-    align-items: center;
-
-    font-size: 24px;
-    font-weight: 600;
-
-    padding-left: 80px; /* 🔥 espace pour bouton sidebar */
-    padding-right: 20px;
-
-    background: white;
-    border-bottom: 2px solid #ddd;
-    box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
-
-    z-index: 999999;
-}
-
-/* CONTENU PRINCIPAL */
-.main .block-container {
-    padding-top: 90px;
-}
-
-/* SIDEBAR descend sous le header */
-[data-testid="stSidebar"] {
-    top: 70px;
-}
-
-/* bouton menu (>>) visible */
-button[kind="header"] {
-    top: 15px !important;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown(
-    '<div class="custom-header"> Tableau de bord écotourisme à Madagascar</div>',
-    unsafe_allow_html=True
-)
 # ====== SVG ICONS ======
 svg_arrivees = """
 <svg width="35" height="35" viewBox="0 0 24 24" fill="#FFFFFF">

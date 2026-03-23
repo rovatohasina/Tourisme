@@ -108,7 +108,22 @@ else:
         # ---- Affichage de l'erreur (en bas de l’input) ----
 if error_message:
     st.sidebar.error(error_message)
-st.subheader("Tableau de bord des arrivées touristiques")
+st.markdown("""
+    <style>
+    .custom-header {
+        font-size: 28px;
+        font-weight: 600;
+        padding: 10px 15px;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+        background-color: #ffffff;
+        margin-bottom: 20px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+st.markdown('<div class="custom-header">Tableau de bord des arrivées touristiques</div>', unsafe_allow_html=True)
 # ====== SVG ICONS ======
 svg_arrivees = """
 <svg width="35" height="35" viewBox="0 0 24 24" fill="#FFFFFF">

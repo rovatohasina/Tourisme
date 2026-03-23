@@ -117,7 +117,7 @@ st.markdown("""
 .custom-header {
     position: fixed;
     top: 0;
-    left: 0;   /* 🔥 important */
+      /* 🔥 important */
     right: 0;
 
     height: 70px;

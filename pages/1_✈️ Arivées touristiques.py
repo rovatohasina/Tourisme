@@ -108,7 +108,7 @@ else:
         # ---- Affichage de l'erreur (en bas de l’input) ----
 if error_message:
     st.sidebar.error(error_message)
-
+st.subheader("Tableau de bord des arrivées touristiques")
 # ====== SVG ICONS ======
 svg_arrivees = """
 <svg width="35" height="35" viewBox="0 0 24 24" fill="#FFFFFF">
@@ -178,7 +178,7 @@ with col1:
         somme_trimestrielle = filtered_data_trimestre.groupby(["Année", "Trimestre"])["Arrivees"].sum().reset_index()
 
     # Fusionner par année
-        st.subheader("Arrivées touristiques par année et par trimestre")
+        
         df_merge = pd.merge(somme_trimestrielle, somme_annuelle_arrivees[["Année", "Arrivees"]], left_on="Année", right_on="Année", how="inner")
         fig = px.bar(
         df_merge,
@@ -186,7 +186,7 @@ with col1:
         y="Arrivees_x",
         color="Trimestre",    
         barmode="group",      
-        # title="Arrivées touristiques par année et par trimestre",
+        title="Arrivées touristiques par année et par trimestre",
         )
 
         fig.update_layout(
@@ -245,12 +245,11 @@ with col2:
             'Arrivées': list(df_yearly['Arrivees']) + [np.nan] * len(future_Années), 
             'Prévision Arrivées': list(df_yearly['Prévision Arrivées'])+ list(future_forecast)
         })
-        st.subheader("Évolution des arrivées touristiques et sa prévision de 4 ans")
         fig = px.line(
             forecast_arrivee,
             x="Année",
             y="Prévision Arrivées",
-            # title="Évolution des arrivées touristiques et sa prévision de 4 ans",
+            title="Évolution des arrivées touristiques et sa prévision de 4 ans",
             line_shape='spline',      
             color_discrete_sequence=['#1f77b4'] 
             )
@@ -269,7 +268,6 @@ heatmap_data = filtered_data.pivot_table(
 heatmap_long = heatmap_data.reset_index().melt(id_vars='Année', var_name='Mois', value_name='Arrivees')
 
     # Création de la heatmap interactive
-st.subheader("Heatmap interactive des arrivées touristiques")
 fig = px.imshow(
         heatmap_data.values,
         x=heatmap_data.columns,
@@ -279,7 +277,7 @@ fig = px.imshow(
     )
 
 fig.update_layout(
-        # title="Heatmap interactive des arrivées touristiques",
+        title="Heatmap interactive des arrivées touristiques",
         xaxis_title="Mois",
         yaxis_title="Année"
     )

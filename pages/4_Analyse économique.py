@@ -165,7 +165,7 @@ with col1:
 
 with col2:
         st.write("")
-
+        st.write("")
         # =================================
         # --- AFFICHAGE DES RÉSULTATS ---
         # ================================
@@ -367,7 +367,7 @@ fig = px.line(
         forecast_solde,
     x="Année",
     y="Valeur",
-    title="Évolution du sold et sa prévision de 4 ans",
+    title="Évolution du solde et sa prévision de 4 ans",
     line_shape='spline',      
     color_discrete_sequence=['#1f77b4'] 
         )

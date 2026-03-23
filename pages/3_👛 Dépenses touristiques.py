@@ -216,7 +216,7 @@ with col2:
         y="dépenses pour les articles de voyage_x",
         color="Trimestre",    
         barmode="group",      
-        title="Dépenses poules articles de voyage par année et par trimestre",
+        title="Dépenses pour les articles de voyage par année et par trimestre",
         )
 
         fig.update_layout(

@@ -108,7 +108,8 @@ with st.sidebar:
         # ---- Affichage de l'erreur (en bas de l’input) ----
         if error_message:
             st.sidebar.error(error_message)
-        
+   
+st.subheader("Tableau de bord des dépenses touristiques")   
 # ====== SVG ICONS ======
 svg_arrivees = """
 <svg width="35" height="35" viewBox="0 0 24 24" fill="#FFFFFF">
@@ -188,7 +189,7 @@ with col1:
         y="dépenses pour le transport_x",
         color="Trimestre",    
         barmode="group",      
-        # title="Arrivées touristiques par année et par trimestre",
+        title="Dépenses pour le transport par année et par trimestre",
         )
 
         fig.update_layout(
@@ -209,7 +210,6 @@ with col2:
         somme_annuelle_depenses2 = filtered_data_trimestre.groupby("Année")["dépenses pour les articles de voyage"].sum().reset_index()
         somme_trimestrielle_depenses2 = filtered_data_trimestre.groupby(["Année", "Trimestre"])["dépenses pour les articles de voyage"].sum().reset_index()   
     # Fusionner par année
-        st.subheader("Dépenses pour les articles de voyage par année et par trimestre")
         df_merge = pd.merge(somme_trimestrielle_depenses2, somme_annuelle_depenses2[["Année", "dépenses pour les articles de voyage"]], left_on="Année", right_on="Année", how="inner")
         fig = px.bar(
         df_merge,
@@ -217,7 +217,7 @@ with col2:
         y="dépenses pour les articles de voyage_x",
         color="Trimestre",    
         barmode="group",      
-        # title="Arrivées touristiques par année et par trimestre",
+        title="Dépenses poules articles de voyage par année et par trimestre",
         )
 
         fig.update_layout(

@@ -108,7 +108,8 @@ with st.sidebar:
         # ---- Affichage de l'erreur (en bas de l’input) ----
         if error_message:
             st.sidebar.error(error_message)
-            
+
+st.subheader("Tableau de bord des recettes touristiques")    
 # ====== SVG ICONS ======
 svg_arrivees = """
 <svg width="35" height="35" viewBox="0 0 24 24" fill="#FFFFFF">
@@ -176,8 +177,7 @@ col1, col2 = st.columns(2)
 with col1:
         somme_annuelle_recettes1 = filtered_data_trimestre.groupby("Année")["recettes pour les articles de transport"].sum().reset_index()
         somme_trimestrielle_recettes1 = filtered_data_trimestre.groupby(["Année", "Trimestre"])["recettes pour les articles de transport"].sum().reset_index()   
-    # Fusionner par année
-        st.subheader("Recettes pour les articles de transport par année et par trimestre")
+    # Fusionner par années 
         df_merge = pd.merge(somme_trimestrielle_recettes1, somme_annuelle_recettes1[["Année", "recettes pour les articles de transport"]], left_on="Année", right_on="Année", how="inner")
         fig = px.bar(
         df_merge,
@@ -185,7 +185,7 @@ with col1:
         y="recettes pour les articles de transport_x",
         color="Trimestre",    
         barmode="group",      
-        # title="Arrivées touristiques par année et par trimestre",
+        title="Recettes pour les articles de transport par année et par trimestre",
         )
 
         fig.update_layout(
@@ -206,7 +206,6 @@ with col2:
         somme_annuelle_recettes2 = filtered_data_trimestre.groupby("Année")["recettes pour les articles de voyage"].sum().reset_index()
         somme_trimestrielle_recettes2 = filtered_data_trimestre.groupby(["Année", "Trimestre"])["recettes pour les articles de voyage"].sum().reset_index()   
     # Fusionner par année
-        st.subheader("Recettes pour les articles de voyage par année et par trimestre")
         df_merge = pd.merge(somme_trimestrielle_recettes2, somme_annuelle_recettes2[["Année", "recettes pour les articles de voyage"]], left_on="Année", right_on="Année", how="inner")
         fig = px.bar(
         df_merge,
@@ -214,7 +213,7 @@ with col2:
         y="recettes pour les articles de voyage_x",
         color="Trimestre",    
         barmode="group",      
-        # title="Arrivées touristiques par année et par trimestre",
+        title="Recettes pour les articles de voyage par année et par trimestre",
         )
 
         fig.update_layout(

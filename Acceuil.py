@@ -113,8 +113,7 @@ with st.sidebar:
 st.markdown("""
     <style>
     .custom-header {
-        position: fixed;  /* 🔥 rend le header fixe */
-        top: 0;
+        position: fixed;  /* 🔥 rend le header fixe *
         left: 0;
         width: 100%;
         z-index: 1000;

@@ -108,22 +108,7 @@ with st.sidebar:
         # ---- Affichage de l'erreur (en bas de l’input) ----
         if error_message:
             st.sidebar.error(error_message)
-st.markdown("""
-    <style>
-    .custom-header {
-        font-size: 28px;
-        font-weight: 600;
-        padding: 10px 15px;
-        border: 2px solid #ddd;
-        border-radius: 10px;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
-        background-color: #ffffff;
-        margin-bottom: 20px;
-    }
-    </style>
-""", unsafe_allow_html=True)
 
-st.markdown('<div class="custom-header">Tableau de bord des analyses économiques </div>', unsafe_allow_html=True)
 col1, col2 = st.columns(2)
 #     with col1:
 #             # --- Création du nuage de points ---
@@ -183,8 +168,7 @@ with col2:
 
         # =================================
         # --- AFFICHAGE DES RÉSULTATS ---
-        # =================================
-        st.subheader("Analyse statistique et détection des anomalies")
+        # ================================
         
         # Detection d'anomalie
         if "Arrivees" in df_merge.columns and "Recettes" in df_merge.columns:

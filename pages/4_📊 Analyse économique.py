@@ -108,7 +108,7 @@ with st.sidebar:
         # ---- Affichage de l'erreur (en bas de l’input) ----
         if error_message:
             st.sidebar.error(error_message)
-
+st.subheader("Tableau de bord des analyses économiques")
 col1, col2 = st.columns(2)
 #     with col1:
 #             # --- Création du nuage de points ---
@@ -138,7 +138,6 @@ with col1:
         # --- NUAGE DE POINTS PLOTLY ---
         # ============================
         st.write("")
-        st.subheader("Relation entre les recettes et le nombre d'arrivées")
         fig = px.scatter(
             data_frame=df_merge,
             x="Arrivees",
@@ -146,7 +145,7 @@ with col1:
             color="Année",
             size="Recettes",
             hover_name="Année",
-            # title="Relation entre les recettes et le nombre d'arrivées par année",
+            title="Relation entre les recettes et le nombre d'arrivées",
             labels={
                 "Arrivees": "Nombre d'arrivées",
                 "Recettes": "Recettes"
@@ -295,7 +294,6 @@ if "recettes actuel" in filtered_data_trimestre.columns and "dépenses actuel" i
         var_name="Type",
         value_name="Valeurs"
         )
-        st.subheader("Recettes et dépenses actuelles du tourisme")
 
     # Graphique empilé avec hover
         fig = px.bar(
@@ -304,7 +302,7 @@ if "recettes actuel" in filtered_data_trimestre.columns and "dépenses actuel" i
         y="Valeurs",
         color="Type",
         labels={"Valeurs": "Valeurs", "Année": "Année", "Type": "Indicateur"},
-        # title="Recettes et dépenses actuelles du tourisme",
+        title="Recettes et dépenses actuelles du tourisme",
         color_discrete_map={"recettes actuel": "#1f77b4", "dépenses actuel": "#063970"}
         )
 
@@ -366,12 +364,11 @@ forecast_solde = pd.DataFrame({
         'Solde': list(df_solde['Solde']) + [np.nan] * len(future_Années), 
         'Valeur': list(df_solde['Prévision Solde'])+ list(future_forecast)
     })
-st.subheader("Évolution du solde de Madagascar et sa prévision de 4 ans")
 fig = px.line(
         forecast_solde,
     x="Année",
     y="Valeur",
-    # title="Évolution du solde de Madagascar et sa prévision de 5 ans",
+    title="Évolution du sold et sa prévision de 4 ans",
     line_shape='spline',      
     color_discrete_sequence=['#1f77b4'] 
         )

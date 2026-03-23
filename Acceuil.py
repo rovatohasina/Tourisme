@@ -113,6 +113,12 @@ with st.sidebar:
 st.markdown("""
     <style>
     .custom-header {
+        position: fixed;  /* 🔥 rend le header fixe */
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+
         font-size: 28px;
         font-weight: 600;
         padding: 10px 15px;
@@ -120,12 +126,19 @@ st.markdown("""
         border-radius: 10px;
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
         background-color: #ffffff;
-        margin-bottom: 20px;
+    }
+
+    /* ajouter un espace en haut pour éviter que le contenu soit caché */
+    .main {
+        padding-top: 80px;
     }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="custom-header">Tableau de bord écotourisme à Madagascar </div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="custom-header">Tableau de bord écotourisme à Madagascar</div>',
+    unsafe_allow_html=True
+)
 # ====== SVG ICONS ======
 svg_arrivees = """
 <svg width="35" height="35" viewBox="0 0 24 24" fill="#FFFFFF">

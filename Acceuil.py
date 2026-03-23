@@ -110,50 +110,53 @@ with st.sidebar:
             st.sidebar.error(error_message)
         somme_trimestrielle = filtered_data_trimestre.groupby(["Année", "Trimestre"])["Arrivees"].sum().reset_index()
 
-st.markdown("""
+ st.markdown("""
 <style>
 
 /* HEADER FIXE */
 .custom-header {
     position: fixed;
     top: 0;
-    left: 250px;
+    left: 0;   /* 🔥 important */
     right: 0;
-    
-    width: 100%;
-    height: 70px;
 
+    height: 70px;
     display: flex;
     align-items: center;
 
     font-size: 24px;
     font-weight: 600;
 
-    padding: 0 20px;
+    padding-left: 80px; /* 🔥 espace pour bouton sidebar */
+    padding-right: 20px;
 
     background: white;
     border-bottom: 2px solid #ddd;
-
     box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
 
-    z-index: 999999; /* 🔥 très élevé pour passer au-dessus des graphes */
+    z-index: 999999;
 }
 
 /* CONTENU PRINCIPAL */
 .main .block-container {
-    padding-top: 90px; /* espace pour éviter que le header cache */
+    padding-top: 90px;
 }
 
-/* OPTION : éviter que plotly passe au-dessus */
-.js-plotly-plot {
-    z-index: 1 !important;
+/* SIDEBAR descend sous le header */
+[data-testid="stSidebar"] {
+    top: 70px;
+}
+
+/* bouton menu (>>) visible */
+button[kind="header"] {
+    top: 15px !important;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown(
-    '<div class="custom-header">🌿 Tableau de bord écotourisme à Madagascar</div>',
+    '<div class="custom-header"> Tableau de bord écotourisme à Madagascar</div>',
     unsafe_allow_html=True
 )
 # ====== SVG ICONS ======

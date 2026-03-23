@@ -137,7 +137,7 @@ with col1:
         # ============================
         # --- NUAGE DE POINTS PLOTLY ---
         # ============================
-        st.write("")
+
         fig = px.scatter(
             data_frame=df_merge,
             x="Arrivees",

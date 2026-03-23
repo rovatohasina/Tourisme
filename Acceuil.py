@@ -108,33 +108,52 @@ with st.sidebar:
         # ---- Affichage de l'erreur (en bas de l’input) ----
         if error_message:
             st.sidebar.error(error_message)
-        somme_trimestrielle = filtered_data_trimestre.groupby(["Année", "Trimestre"])["Arrivees"].sum().reset_index()
-       
+        somme_trimestrielle = filtered_data_trimestre.groupby(["Année", "Trimestre"])["Arrivees"].sum().reset_index(
+
 st.markdown("""
 <style>
+
+/* HEADER FIXE */
 .custom-header {
     position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    
     width: 100%;
-    z-index: 9999;  /* 🔥 très important pour passer au-dessus */
+    height: 70px;
 
-    font-size: 28px;
+    display: flex;
+    align-items: center;
+
+    font-size: 24px;
     font-weight: 600;
-    padding: 15px;
-    border: 2px solid #ddd;
-    border-radius: 0px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
-    background-color: white;
+
+    padding: 0 20px;
+
+    background: white;
+    border-bottom: 2px solid #ddd;
+
+    box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+
+    z-index: 999999; /* 🔥 très élevé pour passer au-dessus des graphes */
 }
 
-/* 🔥 décale tout le contenu vers le bas */
-.block-container {
-    padding-top: 90px;
+/* CONTENU PRINCIPAL */
+.main .block-container {
+    padding-top: 90px; /* espace pour éviter que le header cache */
 }
+
+/* OPTION : éviter que plotly passe au-dessus */
+.js-plotly-plot {
+    z-index: 1 !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown(
-    '<div class="custom-header">Tableau de bord écotourisme à Madagascar</div>',
+    '<div class="custom-header">🌿 Tableau de bord écotourisme à Madagascar</div>',
     unsafe_allow_html=True
 )
 # ====== SVG ICONS ======

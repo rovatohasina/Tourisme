@@ -181,7 +181,6 @@ with col1:
         somme_annuelle_depenses1 = filtered_data_trimestre.groupby("Année")["dépenses pour le transport"].sum().reset_index()
         somme_trimestrielle_depenses1 = filtered_data_trimestre.groupby(["Année", "Trimestre"])["dépenses pour le transport"].sum().reset_index()   
     # Fusionner par année
-        st.subheader("Dépenses pour le transport par année et par trimestre")
         df_merge = pd.merge(somme_trimestrielle_depenses1, somme_annuelle_depenses1[["Année", "dépenses pour le transport"]], left_on="Année", right_on="Année", how="inner")
         fig = px.bar(
         df_merge,

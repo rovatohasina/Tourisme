@@ -110,7 +110,7 @@ with st.sidebar:
             st.sidebar.error(error_message)
         somme_trimestrielle = filtered_data_trimestre.groupby(["Année", "Trimestre"])["Arrivees"].sum().reset_index()
 
- st.markdown("""
+st.markdown("""
 <style>
 
 /* HEADER FIXE */
